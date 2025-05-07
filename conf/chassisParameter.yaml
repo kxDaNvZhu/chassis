@@ -1,0 +1,6 @@
+Mileage:
+  current_mileage: 0
+  last_service_mileage: 0
+  time_interval_mileage: 1.0
+  total_mileage: 8
+

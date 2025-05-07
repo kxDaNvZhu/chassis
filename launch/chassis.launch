@@ -1,0 +1,10 @@
+<launch>
+
+ 
+    <!-- 启动节点 -->
+    <node pkg="drive_chassis" type="drive_chassis" name="chassis_cszd">
+        <!-- 这里可以添加更多节点特定的配置 -->
+    </node>
+
+    <!-- 可以添加更多的节点或配置 -->
+</launch>
