@@ -87,7 +87,7 @@ typedef struct Control_10
         frame.data[6] |=  (Emergency_Stop & 0x01) << 5;
         frame.data[6] |=  (Request & 0x01) << 6;
         frame.data[6] |=  (Steering_Mode_Switching & 0x01) << 7;
-        frame.data[7] = 0x00;
+        frame.data[7] = (Gear_Position & 0x03) & ((Brake_Pressure & 0x03) << 2);
 
         return 0;
 	}

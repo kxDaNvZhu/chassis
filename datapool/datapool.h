@@ -122,6 +122,23 @@ typedef struct fromRemote{
 	bool emergency_stop = false;
 };
 
+typedef struct causeVehicleHalt{
+	int remote_control_mode = 0;
+	// 遥控器指令
+	int remote_emergency_stop = 0;
+	int remote_parking = 0;
+	int remote_brake_enable = 0;
+	int remote_brake_pressure = 0;
+
+	// 自主控制指令
+	int ctrl_emergency_stop = 0;
+	int ctrl_parking = 0;
+	int ctrl_brake_enable = 0;
+	int ctrl_brake_pressure = 0;
+
+	// 车辆底盘故障
+	int chassis_fault_fb = 0;
+};
 
 
 typedef struct ControlCanMainData{
@@ -133,6 +150,7 @@ typedef struct ControlCanMainData{
 	// STATUS_CHASSIS STATUS_CHASSIS_FB;
 	fromCtrl from_ctrl;
 	fromRemote from_remote;
+	causeVehicleHalt cause_of_vehicle_halt;
 	bool isWork = true;
 
 	// TimeStruct time_struct_; 

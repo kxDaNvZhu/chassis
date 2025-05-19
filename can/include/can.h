@@ -75,6 +75,7 @@ private:
 
     void takeModeActual();
     void remoteSpeedCtr();
+    void causeHaltFb();
 
     void ReadChannel();
     void SendChannel();

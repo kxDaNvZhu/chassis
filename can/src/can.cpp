@@ -48,6 +48,19 @@ int Can::InitVars() {
     return 0;
 }
 
+
+int Can::Start() {
+    ros::Rate rate(20);
+    while (ros::ok()) {
+        communication_->SpinOnce();
+        takeModeActual();
+        causeHaltFb();
+        communication_->Publish();
+        rate.sleep();
+    }
+    return 0;
+}
+
 bool Can::readMileageConfigParameter()
 {
     std::ifstream infile(configPath);
@@ -123,7 +136,7 @@ void Can::takeModeActual(){
         // vehicle_ctrl.Relay_Release_2 = DP->GetMainDataPtr()->from_remote.Relay_Release_2;
 
         vehicle_ctrl.Lon_Control_Val = DP->GetMainDataPtr()->from_remote.Lon_Control_Val;
-        vehicle_ctrl.Lat_Control_Val = DP->GetMainDataPtr()->from_remote.Lat_Control_Val;
+        vehicle_ctrl.Lat_Control_Val = - DP->GetMainDataPtr()->from_remote.Lat_Control_Val;
         
         vehicle_ctrl.Speed_Mode = DP->GetMainDataPtr()->from_remote.Speed_Mode;
         vehicle_ctrl.Car_Lights = DP->GetMainDataPtr()->from_remote.Car_Lights;
@@ -225,15 +238,18 @@ void Can::remoteSpeedCtr(){
     DP->GetMainDataPtr()->from_ctrl.Lon_Control_Val_Ctrl = targetRemoteSpeed;
 }
 
-int Can::Start() {
-    ros::Rate rate(20);
-    while (ros::ok()) {
-        communication_->SpinOnce();
-        takeModeActual();
-        communication_->Publish();
-        rate.sleep();
-    }
-    return 0;
+void Can::causeHaltFb(){
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_control_mode = DP->GetMainDataPtr()->from_remote.control_mode;
+
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_emergency_stop = DP->GetMainDataPtr()->from_remote.Emergency_Stop;
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_parking = DP->GetMainDataPtr()->from_remote.Parking;
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_brake_enable = DP->GetMainDataPtr()->from_remote.Brake_Enable;
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_brake_pressure = DP->GetMainDataPtr()->from_remote.Brake_Pressure;
+
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_emergency_stop = DP->GetMainDataPtr()->from_ctrl.Emergency_Stop_Ctrl;
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_parking = DP->GetMainDataPtr()->from_ctrl.Parking_Ctrl;
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_brake_enable = DP->GetMainDataPtr()->from_ctrl.Brake_Enable_Ctrl;
+    DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_brake_pressure = DP->GetMainDataPtr()->from_ctrl.Brake_Pressure_Ctrl;
 }
 
 // 获取当前累计里程（单位：米）

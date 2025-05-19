@@ -11,6 +11,7 @@
 // #include "nav_msgs/Odometry.h"
 // #include "tf/transform_listener.h"
 #include "exterior_common_msgs/RemoteControl.h"
+#include "exterior_common_msgs/cause_vehicle_halt_fb.h"
 
 
 #include <iostream>
@@ -55,6 +56,7 @@ public:
 	ros::Subscriber sub_remotecontrol_;
 	
 	ros::Publisher pub_chassis_fb_;
+	ros::Publisher pub_cause_vehicle_halt_fb_;
 	ros::Publisher pub_carstatus_;
 	ros::NodeHandle nh_;
 

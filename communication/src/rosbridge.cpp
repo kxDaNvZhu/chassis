@@ -8,6 +8,7 @@ Rosbridge::Rosbridge() {
 	sub_remotecontrol_ = nh_.subscribe("/remotecontrol", 10, &Rosbridge::RemoteControlCallBack,this);
 	
     pub_chassis_fb_ = nh_.advertise<exterior_common_msgs::Chassis_Fb>("/chassis_fb", 10);
+    pub_cause_vehicle_halt_fb_ = nh_.advertise<exterior_common_msgs::cause_vehicle_halt_fb>("/cause_vehicle_halt_fb", 10);
     pub_carstatus_ = nh_.advertise<exterior_common_msgs::CarStatus>("/tpvehiclestate", 10);
 }
       
@@ -41,7 +42,7 @@ int Rosbridge::InitLog(){
 
   // 若需要，则设置相关参数
   std::string projectSourceDir = PROJECT_SOURCE_DIR;
-  std::string log_file =  projectSourceDir + std::string("/../../../../log/chassis/"+timeCur+"chassis.log");
+  std::string log_file =  projectSourceDir + std::string("/../../log/chassis/"+timeCur+"chassis.log");
   size_t max_files = 3;                   // 备份数量限制
   size_t max_file_size = 1024*1024*200;    // 文件大小限制(字节)
   int level = 2;                          // 打印/记录的最低日志等级: 1-debug, 2-info
@@ -109,6 +110,23 @@ int Rosbridge::Publish() {
     }
 
     pub_carstatus_.publish(car_status_msg);
+
+    exterior_common_msgs::cause_vehicle_halt_fb cause_halt_fb_msg;
+    cause_halt_fb_msg.remote_control_mode = DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_control_mode; // 控制模式
+
+    cause_halt_fb_msg.remote_emergency_stop = DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_emergency_stop; // 遥控急停指令
+    cause_halt_fb_msg.remote_parking = DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_parking;               // 遥控驻车指令
+    cause_halt_fb_msg.remote_brake_enable = DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_brake_enable;     // 遥控制动使能
+    cause_halt_fb_msg.remote_brake_pressure = DP->GetMainDataPtr()->cause_of_vehicle_halt.remote_brake_pressure; // 遥控制动压力
+
+    cause_halt_fb_msg.ctrl_emergency_stop = DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_emergency_stop; // 自主控制急停指令
+    cause_halt_fb_msg.ctrl_parking = DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_parking;               // 自主控制驻车指令
+    cause_halt_fb_msg.ctrl_brake_enable = DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_brake_enable;     // 自主控制制动使能
+    cause_halt_fb_msg.ctrl_brake_pressure = DP->GetMainDataPtr()->cause_of_vehicle_halt.ctrl_brake_pressure; // 自主控制制动压力
+
+    cause_halt_fb_msg.chassis_fault_fb = feedback_11.Chassis_Fault_Word_Fb; // 车辆底盘故障反馈
+
+    pub_cause_vehicle_halt_fb_.publish(cause_halt_fb_msg);
     
     return 0;
 }
@@ -166,7 +184,7 @@ void Rosbridge::VehicleToCanCallBack(const exterior_common_msgs::VehicleToCan::C
 }
 
 void Rosbridge::RemoteControlCallBack(const exterior_common_msgs::RemoteControl::ConstPtr& msg){
-    std::cout << "control mode:" << msg->control_mode << "\n";
+    // std::cout << "control mode:" << msg->control_mode << "\n";
     DP->GetMainDataPtr()->ctrlCanTrig.seqDrive = msg->header.seq;
     // control_can::Control_10  vehicle_ctrl;
     // DP->GetCtrl(vehicle_ctrl);
@@ -190,7 +208,7 @@ void Rosbridge::RemoteControlCallBack(const exterior_common_msgs::RemoteControl:
     // DP->GetMainDataPtr()->from_remote.Relay_Release_1 = (int)msg->relay_release_1;
     // DP->GetMainDataPtr()->from_remote.Relay_Release_2 = (int)msg->relay_release_2;
 
-    // DP->GetMainDataPtr()->from_remote.control_mode = msg->control_mode;
+    DP->GetMainDataPtr()->from_remote.control_mode = msg->control_mode;
     // DP->GetMainDataPtr()->from_remote.parking = msg->parking;
     // DP->GetMainDataPtr()->from_remote.emergency_stop = msg->emergency_stop;
 
